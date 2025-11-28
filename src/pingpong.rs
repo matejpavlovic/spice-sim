@@ -23,14 +23,15 @@ impl MessageHandler for PingPongNode {
 
 impl PingPongNode {
     pub fn new(own_id: NodeID) -> Self {
+        assert!(own_id == NodeID::from_str("0") || own_id == NodeID::from_str("1"));
         Self{node: Node::new(own_id), counter: 0}
     }
 
     fn other_node(&self) -> NodeID {
-        if self.node.id() == NodeID(0) {
-            NodeID(1)
+        if self.node.id() == NodeID::from_str("0") {
+            NodeID::from_str("1")
         } else {
-            NodeID(0)
+            NodeID::from_str("0")
         }
     }
 

@@ -11,14 +11,14 @@ fn main() {
 
     // Create nodes.
     let mut nodes = HashMap::new();
-    nodes.insert(NodeID(0), pingpong::PingPongNode::new(NodeID(0)));
-    nodes.insert(NodeID(1), pingpong::PingPongNode::new(NodeID(1)));
+    nodes.insert(NodeID::from_str("0"), pingpong::PingPongNode::new(NodeID::from_str("0")));
+    nodes.insert(NodeID::from_str("1"), pingpong::PingPongNode::new(NodeID::from_str("1")));
 
     // Send an init message to each node.
     for node_id in nodes.keys() {
         message_queue.push(Message{
             timestamp: 0,
-            source: NodeID(-1),
+            source: NodeID::from_str("-1"),
             dest: *node_id,
             payload: MessagePayload::Init{}
         })
