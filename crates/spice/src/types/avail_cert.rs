@@ -1,7 +1,7 @@
 use std::fmt::{Display, Formatter};
 use borsh::BorshSerialize;
 
-use crate::node::NodeID;
+use sim_core::node::NodeID;
 use crate::types::chunk::ChunkID;
 
 #[derive(Clone, Debug, Hash, Eq, PartialEq, BorshSerialize)]

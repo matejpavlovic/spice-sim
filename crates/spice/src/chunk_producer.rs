@@ -1,17 +1,18 @@
+use sim_core::message::{Message, MessageHandler};
+use sim_core::node::{Node, NodeID};
 use crate::config::Config;
-use crate::node::{Node, NodeID};
 use crate::core_state::CoreState;
-use crate::message::{Message, MessageHandler, MessagePayload};
+use crate::payload::MessagePayload;
 use crate::types::{Block, ChunkID, ChunkPart, ShardID};
 
 pub struct ChunkProducer {
-    node: Node,
+    node: Node<MessagePayload>,
     core_state: CoreState,
     shard_id: ShardID,
 }
 
-impl MessageHandler for ChunkProducer {
-    fn handle_message(&mut self, msg: Message) {
+impl MessageHandler<MessagePayload> for ChunkProducer {
+    fn handle_message(&mut self, msg: Message<MessagePayload>) {
         match msg.payload {
             MessagePayload::Init => self.init(),
             MessagePayload::Block(block) => self.process_block(block),
@@ -19,7 +20,7 @@ impl MessageHandler for ChunkProducer {
         }
     }
 
-    fn node(&mut self) -> &mut Node {
+    fn node(&mut self) -> &mut Node<MessagePayload> {
         &mut self.node
     }
 }

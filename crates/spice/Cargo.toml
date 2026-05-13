@@ -1,0 +1,9 @@
+[package]
+name = "spice"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+sim-core = { path = "../sim-core" }
+blake3 = "1"
+borsh = { version = "1", features = ["derive"] }

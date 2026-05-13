@@ -1,5 +1,4 @@
-pub mod message;
-pub mod node;
+pub mod payload;
 
 pub mod block_producer;
 pub mod chunk_producer;

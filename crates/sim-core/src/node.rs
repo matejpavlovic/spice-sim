@@ -1,9 +1,10 @@
 use std::cmp::max;
-use std::collections::BinaryHeap;
 use std::fmt::{Debug, Display};
+use std::hash::Hash;
 use borsh::BorshSerialize;
 
-use crate::message::{Message, MessagePayload};
+use crate::message::Message;
+use crate::queue::MessageQueue;
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, BorshSerialize)]
 pub struct NodeID(pub [u8; 32]);
@@ -36,13 +37,13 @@ impl NodeID {
 
 const MESSAGE_DELAY: u64 = 100;
 
-pub struct Node {
+pub struct Node<P> {
     own_id: NodeID,
     local_time: u64,
-    msg_buffer: Vec<Message>,
+    msg_buffer: Vec<Message<P>>,
 }
 
-impl Node {
+impl<P> Node<P> {
     pub fn new(own_id: NodeID) -> Self {
         Self { own_id, local_time: 0, msg_buffer: Vec::new() }
     }
@@ -59,24 +60,28 @@ impl Node {
         println!("{:>5} {:}: {}", self.local_time, self.own_id, msg);
     }
 
-    pub fn pre_process_message(&mut self, msg: &Message) {
+    pub fn advance_time(&mut self, step: u64) {
+        self.local_time += step;
+    }
+}
+
+impl<P: Display> Node<P> {
+    pub fn pre_process_message(&mut self, msg: &Message<P>) {
         self.local_time = max(self.local_time, msg.timestamp);
         println!("RCV {:>5} {:>20}: {}", self.local_time, self.own_id, msg);
     }
 
-    pub fn advance_time(&mut self, step: u64) {
-        self.local_time += step;
-    }
-
-    pub fn send_message(&mut self, payload: MessagePayload, dest: NodeID) {
+    pub fn send_message(&mut self, payload: P, dest: NodeID) {
         let msg = Message::new(self.local_time + MESSAGE_DELAY, self.own_id, dest, payload);
         println!("SND {:>5} {:>20} -> {:>20}: {}", self.local_time, self.own_id, dest, msg);
         self.msg_buffer.push(msg);
     }
+}
 
-    pub fn flush_messages(&mut self, msg_queue: &mut BinaryHeap<Message>) {
+impl<P: Hash + Eq> Node<P> {
+    pub fn flush_messages(&mut self, msg_queue: &mut MessageQueue<P>) {
         for msg in self.msg_buffer.drain(..) {
-            msg_queue.push(msg);
+            msg_queue.inject(msg);
         }
     }
 }

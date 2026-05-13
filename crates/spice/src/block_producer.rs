@@ -1,20 +1,21 @@
 use std::collections::BTreeMap;
+use sim_core::message::{Message, MessageHandler};
+use sim_core::node::{Node, NodeID};
 use crate::availability_tracker::AvailabilityTracker;
 use crate::config::Config;
 use crate::core_state::CoreState;
-use crate::message::{Message, MessageHandler, MessagePayload};
-use crate::node::{Node, NodeID};
+use crate::payload::MessagePayload;
 use crate::types::{AvailCert, Block, ChunkID, ChunkPartID, Height};
 
 pub struct BlockProducer {
-    node: Node,
+    node: Node<MessagePayload>,
     core_state: CoreState,
     availability_tracker: AvailabilityTracker,
     pending_availability_certs: BTreeMap<ChunkID, AvailCert>
 }
 
-impl MessageHandler for BlockProducer {
-    fn handle_message(&mut self, msg: Message) {
+impl MessageHandler<MessagePayload> for BlockProducer {
+    fn handle_message(&mut self, msg: Message<MessagePayload>) {
         match msg.payload {
             MessagePayload::Init => self.init(),
             MessagePayload::Block(block) => self.process_block(block),
@@ -22,7 +23,7 @@ impl MessageHandler for BlockProducer {
             _ => panic!("Unknown message payload type"),
         }
     }
-    fn node(&mut self) -> &mut Node {
+    fn node(&mut self) -> &mut Node<MessagePayload> {
         &mut self.node
     }
 }
