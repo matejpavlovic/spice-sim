@@ -1,9 +1,10 @@
 use std::fmt::{Debug, Display, Formatter};
 use borsh::BorshSerialize;
 
-use crate::types::cert::{AvailCert, StateCert};
+use crate::types::avail_cert::AvailCert;
 use crate::types::hash::Hash;
 use crate::types::height::Height;
+use crate::types::state_cert::StateCert;
 
 #[derive(Clone, Hash, Eq, PartialEq, BorshSerialize)]
 pub struct Block {
@@ -63,9 +64,3 @@ pub struct BlockID {
     pub height: Height,
     pub hash: Hash,
 }
-//
-// impl Ord for BlockID {
-//     fn cmp(&self, other: &Self) -> Ordering {
-//
-//     }
-// }
