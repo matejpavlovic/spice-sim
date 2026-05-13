@@ -8,7 +8,6 @@ use crate::message::{Message, MessagePayload};
 #[derive(Copy, Clone, Eq, PartialEq, Hash, BorshSerialize)]
 pub struct NodeID(pub [u8; 32]);
 
-
 impl Display for NodeID {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let end = self.0.iter().position(|&b| b == 0).unwrap_or(self.0.len());
