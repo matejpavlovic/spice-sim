@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap};
 use std::collections::btree_map::Entry;
-use crate::node::NodeID;
+use sim_core::node::NodeID;
 use crate::types::{AvailCert, ChunkID, ChunkPartID};
 
 pub struct AvailabilityTracker {

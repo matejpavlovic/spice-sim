@@ -1,7 +1,7 @@
 use std::collections::HashSet;
+use sim_core::node::NodeID;
 use crate::types::{Block, ChunkID, Height, ShardID};
 use crate::config::Config;
-use crate::node::NodeID;
 
 pub struct CoreState {
     config: Config,
