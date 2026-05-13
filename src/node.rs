@@ -1,19 +1,25 @@
 use std::cmp::max;
 use std::collections::BinaryHeap;
 use std::fmt::{Debug, Display};
+use borsh::BorshSerialize;
+
 use crate::message::{Message, MessagePayload};
-#[derive(Copy, Clone, Eq, PartialEq, Hash)]
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash, BorshSerialize)]
 pub struct NodeID(pub [u8; 32]);
+
 
 impl Display for NodeID {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", String::from_utf8_lossy(&self.0))
+        let end = self.0.iter().position(|&b| b == 0).unwrap_or(self.0.len());
+        let s = String::from_utf8_lossy(&self.0[..end]);
+        f.write_str(&s)
     }
 }
 
 impl Debug for NodeID {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", String::from_utf8_lossy(&self.0))
+        Display::fmt(&self, f)
     }
 }
 
@@ -50,9 +56,13 @@ impl Node {
         self.local_time
     }
 
+    pub fn log(&self, msg: &str) {
+        println!("{:>5} {:}: {}", self.local_time, self.own_id, msg);
+    }
+
     pub fn pre_process_message(&mut self, msg: &Message) {
         self.local_time = max(self.local_time, msg.timestamp);
-        println!("{:>5} {:}: {:?}", self.local_time, self.own_id, msg);
+        println!("RCV {:>5} {:>20}: {}", self.local_time, self.own_id, msg);
     }
 
     pub fn advance_time(&mut self, step: u64) {
@@ -60,7 +70,9 @@ impl Node {
     }
 
     pub fn send_message(&mut self, payload: MessagePayload, dest: NodeID) {
-        self.msg_buffer.push(Message::new(self.local_time + MESSAGE_DELAY, self.own_id, dest, payload));
+        let msg = Message::new(self.local_time + MESSAGE_DELAY, self.own_id, dest, payload);
+        println!("SND {:>5} {:>20} -> {:>20}: {}", self.local_time, self.own_id, dest, msg);
+        self.msg_buffer.push(msg);
     }
 
     pub fn flush_messages(&mut self, msg_queue: &mut BinaryHeap<Message>) {
