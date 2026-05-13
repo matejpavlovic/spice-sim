@@ -47,8 +47,6 @@ impl PartialOrd for Message {
 #[derive(Debug, Eq, PartialEq, Hash)]
 pub enum MessagePayload {
     Init,
-    Ping(u32),
-    Pong(u32),
     Block(types::Block),
     ChunkPart(ChunkPart), // chunk ID and index of the data part
     StatementChunkPartStored(ChunkPartID)
