@@ -57,8 +57,6 @@ impl Debug for Block {
     }
 }
 
-
-
 impl Block {
     pub fn genesis() -> Block {
         Block{
