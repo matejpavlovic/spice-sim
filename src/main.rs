@@ -30,9 +30,6 @@ fn main() {
         nodes.insert(node_id, Box::new(DataOwner::new(node_id, config.clone())));
     }
 
-    // nodes.insert(NodeID::from_str("0"), pingpong::PingPongNode::new(NodeID::from_str("0")));
-    // nodes.insert(NodeID::from_str("1"), pingpong::PingPongNode::new(NodeID::from_str("1")));
-
     // Send an init message to each node.
     for node_id in nodes.keys() {
         message_queue.push(Message{
