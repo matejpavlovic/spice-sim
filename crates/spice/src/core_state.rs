@@ -100,9 +100,19 @@ impl CoreState {
         Self::round_robin(height, shard, self.config.num_shards, self.config.validator_sample_size, self.config.num_validators, "validator-")
     }
 
+    /// The canonical block at `height`, or `None` if the chain hasn't reached that height yet.
+    pub fn canonical_block_at(&self, height: Height) -> Option<&Block> {
+        self.canonical_chain.get(u32::from(height) as usize)
+    }
+
     /// Returns true once a block whose `avail_certs` cover `chunk_id` has been applied.
     pub fn chunk_available(&self, chunk_id: &ChunkID) -> bool {
         self.avail_certs.contains(chunk_id)
+    }
+
+    /// Returns true once a block whose `state_certs` cover `chunk_id` has been applied.
+    pub fn state_certified(&self, chunk_id: &ChunkID) -> bool {
+        self.state_certs.contains(chunk_id)
     }
 
     pub fn apply_block(&mut self, block: Block) {
