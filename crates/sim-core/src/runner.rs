@@ -13,6 +13,11 @@ pub fn run<P>(
 ) where
     P: Hash + Eq + Display,
 {
+    for node in nodes.values_mut() {
+        node.init();
+        node.node().flush_messages(message_queue);
+    }
+
     while let Some(message) = message_queue.pop() {
         if message.timestamp > max_simulation_time {
             break;

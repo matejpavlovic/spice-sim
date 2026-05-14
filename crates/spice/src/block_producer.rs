@@ -17,7 +17,6 @@ pub struct BlockProducer {
 impl MessageHandler<MessagePayload> for BlockProducer {
     fn handle_message(&mut self, msg: Message<MessagePayload>) {
         match msg.payload {
-            MessagePayload::Init => self.init(),
             MessagePayload::Block(block) => self.process_block(block),
             MessagePayload::StatementChunkPartStored(chunk_part) => self.chunk_part_stored(msg.source, chunk_part),
             _ => panic!("Unknown message payload type"),
@@ -25,6 +24,11 @@ impl MessageHandler<MessagePayload> for BlockProducer {
     }
     fn node(&mut self) -> &mut Node<MessagePayload> {
         &mut self.node
+    }
+    fn init(&mut self) {
+        if self.core_state.block_producer_at(Height(0)) == self.node.id() {
+            self.broadcast_block(Block::genesis())
+        }
     }
 }
 
@@ -45,12 +49,6 @@ impl BlockProducer {
 
         for node in destinations {
             self.node.send_message(MessagePayload::Block(block.clone()), node)
-        }
-    }
-
-    fn init(&mut self) {
-        if self.core_state.block_producer_at(Height(0)) == self.node.id() {
-            self.broadcast_block(Block::genesis())
         }
     }
 
