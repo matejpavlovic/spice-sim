@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use sim_core::message::MessageHandler;
-use sim_core::node::NodeID;
+use sim_core::node::{Node, NodeID};
 use sim_core::queue::MessageQueue;
 use sim_core::runner::run;
 use spice::block_producer::BlockProducer;
@@ -20,17 +20,17 @@ fn main() {
     let core_state = CoreState::new(config.clone());
 
     // Create nodes.
-    let mut nodes: HashMap<NodeID, Box<dyn MessageHandler<MessagePayload>>> = HashMap::new();
+    let mut nodes: HashMap<NodeID, (Node<MessagePayload>, Box<dyn MessageHandler<MessagePayload>>)> = HashMap::new();
     for node_id in core_state.block_producer_ids() {
-        nodes.insert(node_id, Box::new(BlockProducer::new(node_id, config.clone())));
+        nodes.insert(node_id, (Node::new(node_id), Box::new(BlockProducer::new(config.clone()))));
     }
     for i in 0..config.num_shards {
         for node_id in core_state.chunk_producer_ids(ShardID(i)) {
-            nodes.insert(node_id, Box::new(ChunkProducer::new(node_id, ShardID(i), config.clone())));
+            nodes.insert(node_id, (Node::new(node_id), Box::new(ChunkProducer::new(node_id, ShardID(i), config.clone()))));
         }
     }
     for node_id in core_state.data_owner_ids() {
-        nodes.insert(node_id, Box::new(DataOwner::new(node_id, config.clone())));
+        nodes.insert(node_id, (Node::new(node_id), Box::new(DataOwner::new(config.clone()))));
     }
 
     run(&mut nodes, &mut message_queue, MAX_SIMULATION_TIME);

@@ -4,7 +4,6 @@ use std::hash::{Hash, Hasher};
 use fxhash::FxHasher;
 
 use crate::node::{Node, NodeID};
-use crate::queue::MessageQueue;
 
 #[derive(Debug, Eq, PartialEq, Hash)]
 pub struct Message<P> {
@@ -45,14 +44,8 @@ pub trait MessageHandler<P>
 where
     P: Hash + Eq + Display,
 {
-    fn handle_message(&mut self, msg: Message<P>);
-    fn node(&mut self) -> &mut Node<P>;
-    fn init(&mut self) {}
-    fn process_message(&mut self, message: Message<P>, message_output: &mut MessageQueue<P>) {
-        self.node().pre_process_message(&message);
-        self.handle_message(message);
-        self.node().flush_messages(message_output);
-    }
+    fn handle_message(&mut self, node: &mut Node<P>, msg: Message<P>);
+    fn init(&mut self, _node: &mut Node<P>) {}
 }
 
 fn hash_msg<P: Hash>(message: &Message<P>) -> u64 {
