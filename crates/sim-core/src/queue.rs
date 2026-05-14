@@ -3,6 +3,8 @@ use std::hash::Hash;
 
 use crate::message::Message;
 
+/// Priority queue of in-flight messages. Wraps `BinaryHeap` so callers don't depend on the
+/// specific data structure; consumption (`pop`) is reserved for the simulator.
 pub struct MessageQueue<P> {
     heap: BinaryHeap<Message<P>>,
 }

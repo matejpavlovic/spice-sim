@@ -27,6 +27,8 @@ impl ChunkProducer {
         }
     }
 
+    // Apply the block; if this node is the chunk producer for this height+shard,
+    // produce a chunk and disperse it to data owners.
     fn process_block(&mut self, node: &mut Node<MessagePayload>, block: Block) {
         let height = block.height;
         let block_id = block.id();
@@ -38,6 +40,7 @@ impl ChunkProducer {
         }
     }
 
+    // Split the chunk into parts and send each part to its assigned data owner.
     fn disperse_chunk(&mut self, node: &mut Node<MessagePayload>, chunk: ChunkID) {
         for (i, data_owner) in self.core_state.data_owner_at(chunk.block_id.height, chunk.shard_id).into_iter().enumerate() {
             let data_part = MessagePayload::ChunkPart(ChunkPart{chunk_id: chunk.clone(), index: i.try_into().unwrap()});

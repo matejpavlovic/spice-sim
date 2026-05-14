@@ -5,6 +5,7 @@ use fxhash::FxHasher;
 
 use crate::node::{Node, NodeID};
 
+/// A message in flight: scheduled to arrive at `dest` at logical time `timestamp`.
 #[derive(Debug, Eq, PartialEq, Hash)]
 pub struct Message<P> {
     pub timestamp: u64,
@@ -26,6 +27,8 @@ impl<P> Message<P> {
 }
 
 impl<P: Hash + Eq> Ord for Message<P> {
+    // Earlier timestamp first; ties broken by message hash so the order is deterministic.
+    // The outer order is reversed because BinaryHeap is a max-heap and we want earliest-first.
     fn cmp(&self, other: &Self) -> Ordering {
         match self.timestamp.cmp(&other.timestamp) {
             Ordering::Equal => hash_msg(self).cmp(&hash_msg(other)),
@@ -40,6 +43,8 @@ impl<P: Hash + Eq> PartialOrd for Message<P> {
     }
 }
 
+/// User-implemented logic for a node. The framework calls `init` once at startup and
+/// `handle_message` whenever a message destined for the node is dispatched.
 pub trait MessageHandler<P>
 where
     P: Hash + Eq + Display,
