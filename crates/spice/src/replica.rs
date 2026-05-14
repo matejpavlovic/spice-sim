@@ -1,23 +1,28 @@
 use sim_core::message::{Message, MessageHandler};
-use sim_core::node::Node;
+use sim_core::node::{Node, NodeID};
 
 use crate::config::Config;
 use crate::core_state::CoreState;
+use crate::endorsement_tracker::EndorsementTracker;
 use crate::payload::MessagePayload;
 use crate::types::{Block, ChunkID, Height, ShardID, StateWitness};
 
-/// Observes the chain, executes its shard's chunks once they become available, and ships a
-/// state witness for each executed chunk to the sampled validators.
+/// Observes the chain, executes its shard's chunks once they become available, and sends a
+/// state witness for each executed chunk to the sampled validators. Also tracks the state
+/// endorsements that validators send out, so the replica can later make progress decisions
+/// independently of the block producers and the certificates included on chain.
 pub struct Replica {
     core_state: CoreState,
     shard_id: ShardID,
     next_height: Height,
+    endorsement_tracker: EndorsementTracker,
 }
 
 impl MessageHandler<MessagePayload> for Replica {
     fn handle_message(&mut self, node: &mut Node<MessagePayload>, msg: Message<MessagePayload>) {
         match msg.payload {
             MessagePayload::Block(block) => self.process_block(node, block),
+            MessagePayload::StatementStateEndorsement(chunk_id) => self.state_endorsed(msg.source, chunk_id),
             _ => panic!("Unknown message payload type"),
         }
     }
@@ -29,7 +34,13 @@ impl Replica {
             core_state: CoreState::new(config),
             shard_id,
             next_height: Height(0),
+            endorsement_tracker: EndorsementTracker::new(),
         }
+    }
+
+    // Record an endorsement from `validator`. Quorum-driven progress will hang off this later.
+    fn state_endorsed(&mut self, validator: NodeID, chunk_id: ChunkID) {
+        self.endorsement_tracker.add(validator, &chunk_id);
     }
 
     fn process_block(&mut self, node: &mut Node<MessagePayload>, block: Block) {

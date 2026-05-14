@@ -36,10 +36,14 @@ impl Validator {
         self.submit_state_endorsement(node, witness.chunk_id);
     }
 
-    // Send a state endorsement for `chunk_id` to every block producer.
+    // Send a state endorsement for `chunk_id` to every block producer and every replica. Replicas
+    // need their own copy so they can track endorsements independently of the chain.
     fn submit_state_endorsement(&mut self, node: &mut Node<MessagePayload>, chunk_id: ChunkID) {
-        for block_producer in self.core_state.block_producer_ids() {
-            node.send_message(MessagePayload::StatementStateEndorsement(chunk_id.clone()), block_producer);
+        let mut destinations = vec![];
+        destinations.append(&mut self.core_state.block_producer_ids());
+        destinations.append(&mut self.core_state.replica_ids_all_shards());
+        for dest in destinations {
+            node.send_message(MessagePayload::StatementStateEndorsement(chunk_id.clone()), dest);
         }
     }
 }
