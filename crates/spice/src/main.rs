@@ -26,7 +26,7 @@ fn main() {
     }
     for i in 0..config.num_shards {
         for node_id in core_state.chunk_producer_ids(ShardID(i)) {
-            nodes.insert(node_id, (Node::new(node_id), Box::new(ChunkProducer::new(node_id, ShardID(i), config.clone()))));
+            nodes.insert(node_id, (Node::new(node_id), Box::new(ChunkProducer::new(ShardID(i), config.clone()))));
         }
     }
     for node_id in core_state.data_owner_ids() {

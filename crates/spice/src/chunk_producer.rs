@@ -1,12 +1,11 @@
 use sim_core::message::{Message, MessageHandler};
-use sim_core::node::{Node, NodeID};
+use sim_core::node::Node;
 use crate::config::Config;
 use crate::core_state::CoreState;
 use crate::payload::MessagePayload;
 use crate::types::{Block, ChunkID, ChunkPart, ShardID};
 
 pub struct ChunkProducer {
-    own_id: NodeID,
     core_state: CoreState,
     shard_id: ShardID,
 }
@@ -21,9 +20,8 @@ impl MessageHandler<MessagePayload> for ChunkProducer {
 }
 
 impl ChunkProducer {
-    pub fn new(own_id: NodeID, shard_id: ShardID, config: Config) -> Self {
+    pub fn new(shard_id: ShardID, config: Config) -> Self {
         Self {
-            own_id,
             core_state: CoreState::new(config),
             shard_id,
         }
@@ -35,7 +33,7 @@ impl ChunkProducer {
         let shard_id = self.shard_id;
         self.core_state.apply_block(block);
 
-        if self.core_state.chunk_producer_at(height, self.shard_id) == self.own_id {
+        if self.core_state.chunk_producer_at(height, self.shard_id) == node.id() {
             self.disperse_chunk(node, ChunkID{block_id, shard_id})
         }
     }
