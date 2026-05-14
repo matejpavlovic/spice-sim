@@ -15,7 +15,6 @@ pub struct DataOwner {
 impl MessageHandler<MessagePayload> for DataOwner {
     fn handle_message(&mut self, msg: Message<MessagePayload>) {
         match msg.payload {
-            MessagePayload::Init => self.init(),
             MessagePayload::ChunkPart(chunk_part) => self.process_chunk_part(chunk_part),
             _ => panic!("Unknown message payload type"),
         }
@@ -33,9 +32,6 @@ impl DataOwner {
             core_state: CoreState::new(config),
             stored_parts: HashMap::new(),
         }
-    }
-
-    pub fn init(&mut self) {
     }
 
     fn process_chunk_part(&mut self, chunk_part: ChunkPart) {

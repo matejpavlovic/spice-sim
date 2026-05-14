@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use sim_core::message::{Message, MessageHandler};
+use sim_core::message::MessageHandler;
 use sim_core::node::NodeID;
 use sim_core::queue::MessageQueue;
 use sim_core::runner::run;
@@ -31,16 +31,6 @@ fn main() {
     }
     for node_id in core_state.data_owner_ids() {
         nodes.insert(node_id, Box::new(DataOwner::new(node_id, config.clone())));
-    }
-
-    // Send an init message to each node.
-    for node_id in nodes.keys() {
-        message_queue.inject(Message {
-            timestamp: 0,
-            source: NodeID::from_str("-1"),
-            dest: *node_id,
-            payload: MessagePayload::Init,
-        })
     }
 
     run(&mut nodes, &mut message_queue, MAX_SIMULATION_TIME);

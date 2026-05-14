@@ -14,7 +14,6 @@ pub struct ChunkProducer {
 impl MessageHandler<MessagePayload> for ChunkProducer {
     fn handle_message(&mut self, msg: Message<MessagePayload>) {
         match msg.payload {
-            MessagePayload::Init => self.init(),
             MessagePayload::Block(block) => self.process_block(block),
             _ => panic!("Unknown message payload type"),
         }
@@ -33,10 +32,6 @@ impl ChunkProducer {
             core_state: CoreState::new(config),
             shard_id,
         }
-    }
-
-    fn init(&mut self) {
-        // Nothing to initialize
     }
 
     fn process_block(&mut self, block: Block) {

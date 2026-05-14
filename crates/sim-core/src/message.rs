@@ -47,6 +47,7 @@ where
 {
     fn handle_message(&mut self, msg: Message<P>);
     fn node(&mut self) -> &mut Node<P>;
+    fn init(&mut self) {}
     fn process_message(&mut self, message: Message<P>, message_output: &mut MessageQueue<P>) {
         self.node().pre_process_message(&message);
         self.handle_message(message);
