@@ -98,6 +98,11 @@ impl CoreState {
         Self::round_robin(height, shard, self.config.num_shards, self.config.validator_sample_size, self.config.num_validators, "validator-")
     }
 
+    /// Returns true once a block whose `avail_certs` cover `chunk_id` has been applied.
+    pub fn chunk_available(&self, chunk_id: &ChunkID) -> bool {
+        self.avail_certs.contains(chunk_id)
+    }
+
     pub fn apply_block(&mut self, block: Block) {
         if let Some(old_head) = self.canonical_chain.last() {
             if block.parent_hash != old_head.hash() {
