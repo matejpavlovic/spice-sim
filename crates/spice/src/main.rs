@@ -5,7 +5,9 @@ use spice::config::Config;
 use spice::core_state::CoreState;
 use spice::data_owner::DataOwner;
 use spice::payload::MessagePayload;
+use spice::replica::Replica;
 use spice::types::ShardID;
+use spice::validator::Validator;
 
 const MAX_SIMULATION_TIME: u64 = 1000;
 
@@ -24,6 +26,14 @@ fn main() {
     }
     for node_id in core_state.data_owner_ids() {
         sim.register(node_id, DataOwner::new(config.clone()));
+    }
+    for i in 0..config.num_shards {
+        for node_id in core_state.replica_ids(ShardID(i)) {
+            sim.register(node_id, Replica::new(ShardID(i), config.clone()));
+        }
+    }
+    for node_id in core_state.validator_ids() {
+        sim.register(node_id, Validator::new(config.clone()));
     }
 
     sim.run(MAX_SIMULATION_TIME);

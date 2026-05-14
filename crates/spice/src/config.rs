@@ -11,6 +11,7 @@ pub struct Config {
     pub validator_sample_size: u32,
     pub num_chunk_data_parts: u32,
     pub availability_quorum: u32,
+    pub endorsement_quorum: u32,
 }
 
 impl Config {
@@ -26,6 +27,7 @@ impl Config {
             validator_sample_size: 4,
             num_chunk_data_parts: 4,
             availability_quorum: 3, // This many out of chunk_data_parts are
+            endorsement_quorum: 3, // This many out of validator_sample_size endorsements yield a StateCert.
         }
     }
 
