@@ -4,8 +4,11 @@ use crate::types::{Block, ChunkPart, ChunkPartID};
 
 #[derive(Debug, Eq, PartialEq, Hash)]
 pub enum MessagePayload {
+    // A newly proposed block, broadcast by a block producer.
     Block(Block),
-    ChunkPart(ChunkPart), // chunk ID and index of the data part
+    // One erasure-coded part of a chunk, sent from a chunk producer to a data owner for storage.
+    ChunkPart(ChunkPart),
+    // A data owner's attestation that it has stored a given chunk part.
     StatementChunkPartStored(ChunkPartID)
 }
 

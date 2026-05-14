@@ -3,6 +3,8 @@ use sim_core::node::NodeID;
 use crate::types::{Block, ChunkID, Height, ShardID};
 use crate::config::Config;
 
+/// Represents the core blockchain state that is deterministically updated exclusive through
+/// statements submitted by system nodes. It does not directly contain any application state.
 pub struct CoreState {
     config: Config,
     canonical_chain: Vec<Block>,
@@ -119,6 +121,9 @@ impl CoreState {
         self.canonical_chain.push(block);
     }
 
+    // Deterministically pick `num_items` consecutive ids (wrapping) from a pool of `pool_size`,
+    // offset by `(shard + height * num_shards) * num_items` so each (height, shard) gets a
+    // distinct slice without overlap within the same height.
     fn round_robin(
         height: Height,
         shard: ShardID,
@@ -128,8 +133,8 @@ impl CoreState {
         prefix: &str,
     ) -> Vec<NodeID> {
         //          < ---------- items in previous and this block ----------- >
-        //           < -- batches in previous and this block --- >
-        //                    < -- batches in previous blocks -- >
+        //               < -- batches in previous and this block --- >
+        //                        < -- batches in previous blocks -- >
         let mut index = ((shard + height /*   */ * /*   */ num_shards) * num_items) % pool_size;
         let mut node_ids = vec![];
         for _ in 0..num_items {

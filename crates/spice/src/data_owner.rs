@@ -28,11 +28,13 @@ impl DataOwner {
         }
     }
 
+    // Store the received chunk part and immediately attest to having stored it.
     fn process_chunk_part(&mut self, node: &mut Node<MessagePayload>, chunk_part: ChunkPart) {
         self.submit_statement_chunk_part_stored(node, chunk_part.id());
         self.stored_parts.insert(chunk_part.id(), MessagePayload::ChunkPart(chunk_part));
     }
 
+    // Send a "stored" attestation for this part to every block producer.
     fn submit_statement_chunk_part_stored(&mut self, node: &mut Node<MessagePayload>, chunk_part_id: ChunkPartID) {
         for block_producer in self.core_state.block_producer_ids() {
             node.send_message(MessagePayload::StatementChunkPartStored(chunk_part_id.clone()), block_producer);

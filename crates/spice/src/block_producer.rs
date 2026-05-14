@@ -21,6 +21,7 @@ impl MessageHandler<MessagePayload> for BlockProducer {
             _ => panic!("Unknown message payload type"),
         }
     }
+    // If this node is the producer assigned to height 0, broadcast the genesis block.
     fn init(&mut self, node: &mut Node<MessagePayload>) {
         if self.core_state.block_producer_at(Height(0)) == node.id() {
             self.broadcast_block(node, Block::genesis())
@@ -37,6 +38,7 @@ impl BlockProducer {
         }
     }
 
+    // Send the block to every block producer and every chunk producer across all shards.
     fn broadcast_block(&mut self, node: &mut Node<MessagePayload>, block: Block) {
         let mut destinations = vec![];
         destinations.append(&mut self.core_state.block_producer_ids());
@@ -47,6 +49,8 @@ impl BlockProducer {
         }
     }
 
+    // Apply the received block to local state; if this node is the producer for the next height,
+    // build and broadcast the next block carrying any pending availability certificates.
     fn process_block(&mut self, node: &mut Node<MessagePayload>, block: Block) {
         let height = block.height;
         let hash = block.hash();
@@ -62,6 +66,8 @@ impl BlockProducer {
         }
     }
 
+    // Record a data owner's attestation; once the availability quorum is met for a chunk, create an
+    // availability certificate that will be included in a future block.
     fn chunk_part_stored(&mut self, data_owner: NodeID, chunk_part_id: ChunkPartID) {
         // If we want actual fault tolerance, we need to check here if the part owner is really assigned to this part.
         // Below, we then need to check if a sufficient number of distinct owners confirmed a sufficient number of

@@ -6,6 +6,7 @@ use crate::message::MessageHandler;
 use crate::node::{Node, NodeID};
 use crate::queue::MessageQueue;
 
+/// Owns every node's framework state and the shared message queue, and drives the simulation.
 pub struct Simulator<P> {
     nodes: HashMap<NodeID, (Node<P>, Box<dyn MessageHandler<P>>)>,
     queue: MessageQueue<P>,
@@ -27,11 +28,13 @@ where
     }
 
     pub fn run(&mut self, max_simulation_time: u64) {
+        // Bootstrap: let every handler run its init hook and flush any messages it produced.
         for (node, handler) in self.nodes.values_mut() {
             handler.init(node);
             node.flush_messages(&mut self.queue);
         }
 
+        // Dispatch: drain the queue in (timestamp, hash) order until empty or past the deadline.
         while let Some(message) = self.queue.pop() {
             if message.timestamp > max_simulation_time {
                 break;
