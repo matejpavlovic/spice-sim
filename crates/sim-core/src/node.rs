@@ -72,7 +72,7 @@ impl<P: Display> Node<P> {
     // Lamport-style clock update on receipt: advance local time to at least the message's timestamp.
     pub fn pre_process_message(&mut self, msg: &Message<P>) {
         self.local_time = max(self.local_time, msg.timestamp);
-        println!("RCV {:>5} {:>20}: {}", self.local_time, self.own_id, msg);
+        println!("RCV {:>5} {:>20} <- {}: {}", self.local_time, self.own_id, msg.source, msg);
     }
 
     // Stamp the outgoing message with `local_time + MESSAGE_DELAY` and buffer it; the framework
