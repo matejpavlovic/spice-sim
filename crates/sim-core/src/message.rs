@@ -16,7 +16,7 @@ pub struct Message<P> {
 
 impl<P: Display> Display for Message<P> {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "Msg({}: {})", self.source, self.payload)
+        write!(f, "Msg({})", self.payload)
     }
 }
 
